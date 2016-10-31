@@ -6,4 +6,6 @@ Console will prompt for Start & End Date, sit back and watch it work.
 
 Open your `appsettings.json` file and change configuration values to ones matching your account.
 
-The only real variables to change for _live_ use are `DefaultConnection` for your database (although you can use the local db just fine) and then your `Credentials` should be your `AccountID:APIkey`
+The only real variables to change for _live_ use are `DefaultConnection` for your database (although you can use the local db just fine) and then your `Credentials` should be your `AccountID:APIkey`.  Also, the `TwilioApi` variable does have the `Account SID` hard coded as well.
+
+Happy hacking!

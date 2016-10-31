@@ -11,19 +11,21 @@ namespace TwilioCallsImporter
 {
     public class Program
     {
-        public static IConfiguration Configuration { get; }
+        public static IConfigurationRoot Configuration { get; private set; }
         public static IServiceProvider ServiceProvider { get; }
         static Program()
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
 
             var services = new ServiceCollection();
 
-            services.AddSingleton(Configuration);
+            services.AddSingleton<IConfiguration>(Configuration);
+            //services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
             services.AddScoped<ICallData, CallData>();
             services.AddSingleton<Application>();
             ServiceProvider = services.BuildServiceProvider();

@@ -21,7 +21,7 @@ namespace TwilioCallsImporter
         private string _twilioEndpoint;
 
         private static HttpClient Client = new HttpClient();
-        public Application(ICallData callData, IConfiguration config)
+        public Application(IConfiguration config, ICallData callData)
         {
             _callData = callData;
             _twilioApi = config["TwilioApi"];
@@ -64,7 +64,6 @@ namespace TwilioCallsImporter
             if (initRequest.IsSuccessStatusCode)
             {
                 var response = new List<Call>();
-              // var results = new Result();
 
                 string json = await initRequest.Content.ReadAsStringAsync();
 
@@ -75,10 +74,32 @@ namespace TwilioCallsImporter
                 Console.WriteLine(results.next_page_uri);
                 Console.ReadKey();
 
-                //foreach(var call in results.calls)
-                //{
-                //    Console.WriteLine($"{call.start_time} - {call.end_time} // {call.to_formatted}");
-                //}
+                foreach (var call in results.calls)
+                {
+                    call.from = call.from.Replace("sip:", "").Replace("+", "");
+                    call.to = call.to.Replace("sip:", "").Replace("+", "");
+                    if (call.to.Contains("@"))
+                    {
+                        call.to = call.to.Substring(0, call.to.IndexOf("@"));
+                    }
+                    if (call.from.Contains("@"))
+                    {
+                        call.from = call.from.Substring(0, call.from.IndexOf("@"));
+                    }
+                    response.Add(new Call
+                    {
+                        StartTime = DateTime.Parse(call.start_time),
+                        EndTime = DateTime.Parse(call.end_time),
+                        TrunkId = call.account_sid,
+                        CallId = call.sid,
+                        SourceNumber = call.from,
+                        DestinationNumber = call.to,
+                        Duration = int.Parse(call.duration),
+                        CallCost = float.Parse(call.price.Replace("-",""))
+                    });
+                }
+
+                _callData.Add(response);
 
                 while (results.next_page_uri != null)
                 {
@@ -87,11 +108,39 @@ namespace TwilioCallsImporter
                     string convertJson = await nextPage.Content.ReadAsStringAsync();
                     var serializerSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
                     results = JsonConvert.DeserializeObject<Result>(convertJson);
+
                     Console.WriteLine("This & Next Page:");
                     Console.WriteLine(results.page);
                     Console.WriteLine(results.next_page_uri);
                     Console.WriteLine($"Calls pulled: {results.calls.Count()}");
 
+                    var nextResponse = new List<Call>();
+                    foreach (var call in results.calls)
+                    {
+                        call.from = call.from.Replace("sip:", "").Replace("+", "");
+                        call.to = call.to.Replace("sip:", "").Replace("+", "");
+                        if (call.to.Contains("@"))
+                        {
+                            call.to = call.to.Substring(0, call.to.IndexOf("@"));
+                        }
+                        if (call.from.Contains("@"))
+                        {
+                            call.from = call.from.Substring(0, call.from.IndexOf("@"));
+                        }
+                        nextResponse.Add(new Call
+                        {
+                            StartTime = DateTime.Parse(call.start_time),
+                            EndTime = DateTime.Parse(call.end_time),
+                            TrunkId = call.account_sid,
+                            CallId = call.sid,
+                            SourceNumber = call.from,
+                            DestinationNumber = call.to,
+                            Duration = int.Parse(call.duration),
+                            CallCost = float.Parse(call.price.Replace("-", ""))
+                        });
+                    }
+
+                    _callData.Add(nextResponse);
                 }
 
 

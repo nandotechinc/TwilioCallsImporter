@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TwilioCallsImporter.Services
 {
-    interface IDbConnectionProvider
+    public interface IDbConnectionProvider
     {
         IDbConnection Connection { get; }
     }

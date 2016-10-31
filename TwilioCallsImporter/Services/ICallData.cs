@@ -8,6 +8,6 @@ namespace TwilioCallsImporter.Services
 {
     public interface ICallData
     {
-        void Add(Call callToImport);
+        void Add(IEnumerable<Call> callToImport);
     }
 }

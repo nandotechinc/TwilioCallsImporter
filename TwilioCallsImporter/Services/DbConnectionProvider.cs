@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace TwilioCallsImporter.Services
 {
     public class DbConnectionProvider : IDbConnectionProvider
     {
-        private string connectionString;
+        private static string connectionString;
         public DbConnectionProvider(IConfiguration config)
         {
             connectionString = config.GetConnectionString("DefaultConnection");
@@ -18,7 +19,7 @@ namespace TwilioCallsImporter.Services
         {
             get
             {
-                throw new NotImplementedException();
+                return new SqlConnection(connectionString);
             }
         }
     }

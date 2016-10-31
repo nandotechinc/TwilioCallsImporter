@@ -10,6 +10,7 @@ namespace TwilioCallsImporter.Data
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string IpAddress { get; set; }
+        public string TrunkId { get; set; }
         public string CallId { get; set; }
         public string SourceNumber { get; set; }
         public string DestinationNumber { get; set; }

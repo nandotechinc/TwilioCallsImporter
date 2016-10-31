@@ -34,7 +34,7 @@ namespace TwilioCallsImporter
             {
                 var app = ServiceProvider.GetService<Application>();
 
-                app.Run();
+                app.Run().Wait();
             }
             finally
             {

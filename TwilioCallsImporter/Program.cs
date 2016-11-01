@@ -25,7 +25,6 @@ namespace TwilioCallsImporter
             var services = new ServiceCollection();
 
             services.AddSingleton<IConfiguration>(Configuration);
-            //services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
             services.AddScoped<ICallData, CallData>();
             services.AddSingleton<Application>();
             ServiceProvider = services.BuildServiceProvider();

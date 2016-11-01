@@ -57,9 +57,9 @@ namespace TwilioCallsImporter
                 new AuthenticationHeaderValue("Basic", Convert.ToBase64String(credentials));
             var initRequest = Client.GetAsync(authUri).Result;
 
-            Console.ReadKey();
+            // Console.ReadKey();
 
-            
+
 
             if (initRequest.IsSuccessStatusCode)
             {
@@ -72,7 +72,7 @@ namespace TwilioCallsImporter
                 Console.WriteLine("First & Next Page:");
                 Console.WriteLine(results.first_page_uri);
                 Console.WriteLine(results.next_page_uri);
-                Console.ReadKey();
+               // Console.ReadKey();
 
                 foreach (var call in results.calls)
                 {
@@ -100,19 +100,21 @@ namespace TwilioCallsImporter
                 }
 
                 _callData.Add(response);
+                int callCount = results.calls.Count();
 
                 while (results.next_page_uri != null)
                 {
 
                     var nextPage = Client.GetAsync($"{_twilioEndpoint}{results.next_page_uri}").Result;
-                    string convertJson = await nextPage.Content.ReadAsStringAsync();
+                    var convertJson = await nextPage.Content.ReadAsStringAsync();
                     var serializerSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
                     results = JsonConvert.DeserializeObject<Result>(convertJson);
 
+                    callCount += results.calls.Count();
                     Console.WriteLine("This & Next Page:");
                     Console.WriteLine(results.page);
                     Console.WriteLine(results.next_page_uri);
-                    Console.WriteLine($"Calls pulled: {results.calls.Count()}");
+                    Console.WriteLine($"Calls pulled: {callCount}");
 
                     var nextResponse = new List<Call>();
                     foreach (var call in results.calls)
@@ -127,7 +129,9 @@ namespace TwilioCallsImporter
                         {
                             call.from = call.from.Substring(0, call.from.IndexOf("@"));
                         }
-                        nextResponse.Add(new Call
+
+
+                        var callToAdd = new Call()
                         {
                             StartTime = DateTime.Parse(call.start_time),
                             EndTime = DateTime.Parse(call.end_time),
@@ -135,9 +139,12 @@ namespace TwilioCallsImporter
                             CallId = call.sid,
                             SourceNumber = call.from,
                             DestinationNumber = call.to,
-                            Duration = int.Parse(call.duration),
-                            CallCost = float.Parse(call.price.Replace("-", ""))
-                        });
+                            Duration = int.Parse(call.duration ?? "0"),
+                            CallCost = Math.Abs(float.Parse(call.price ?? "0.0")) 
+                        };
+                        
+
+                        nextResponse.Add(callToAdd);
                     }
 
                     _callData.Add(nextResponse);
